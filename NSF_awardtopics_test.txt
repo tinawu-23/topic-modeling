@@ -1,7 +1,10 @@
 NSF Award Title Non-phrases
-application basic database ease enhancements environments expert system applications
-algorithm implementation analysis appropriate computers crash recovery 
-assumption basic problems certain special cases complete local surface geometry 
-active retrieval system realistic experiments reports research 
-theory computer simulator system learning process particular model proposal research 
-artificial intelligence basic query languages computer science congruence closure database 
+research computer vision
+research natural language processing
+research computer vision
+research robotics
+research robotics
+research natural language processing
+research machine learning
+research machine learning
+research natural language processing
