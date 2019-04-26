@@ -23,7 +23,8 @@ def preprocessing(fileoutput,fileinput,MIN_NUMWORDS=10,IF_STOPWORD=True):
     fr = open(fileinput,'r')
     fr.readline()
     for line in fr:
-        text = cleantext(line,MIN_NUMWORDS,IF_STOPWORD)
+        arr = line.strip('\r\n').split('\t')
+        text = cleantext(arr[4]+' '+arr[5],MIN_NUMWORDS,IF_STOPWORD)
         if text == '': continue
         fw.write(text+'\n')
     fr.close()
@@ -129,14 +130,14 @@ def preprocessing_corpuswide(fileoutput,fileinput,filecorpuswide):
 
 if __name__ == '__main__':
 
-    ''' run LDA while removing regular stopwords '''
-    preprocessing('LDA/documents.txt', 'NSF_awardtopics.txt', 10, True)
-
-    runlda('LDA/topicwords.csv','LDA/wordtopics.csv', \
-            'LDA/doctopics.csv','LDA/documents.txt',30,100,100)
-
     ''' run LDA while NOT removing regular stopwords '''
-    # preprocessing('LDA/documents-stop.txt','DATA/nsf-awards.txt',10,False)
+    preprocessing('LDA/nsf-awards.txt', 'nsf-awards.txt', 10, False)
+
+    # runlda('LDA/topicwords.csv','LDA/wordtopics.csv', \
+    #         'LDA/doctopics.csv','LDA/documents.txt',30,100,100)
+
+    ''' run LDA while removing regular stopwords '''
+    preprocessing('LDA/documents.txt','nsf-awards.txt',10,True)
     # runlda('LDA/topicwords-stop.csv','LDA/wordtopics-stop.csv', \
     #         'LDA/doctopics-stop.csv','LDA/documents-stop.txt',30,100,100)
 
@@ -149,8 +150,8 @@ if __name__ == '__main__':
 
 
     ''' run LDA on original data but with corpus wide stopwords removed '''
-    # preprocessing_corpuswide('LDA/documents-corpuswide.txt','LDA/documents.txt', \
-    #         'LDA/corpuswide-stop.txt')
+    preprocessing_corpuswide('LDA/documents-all.txt','LDA/documents.txt', \
+            'LDA/corpuswide-stop.txt')
     # runlda('LDA/topicwords-corpuswide.csv','LDA/wordtopics-corpuswide.csv', \
     #         'LDA/doctopics-corpuswide.csv','LDA/documents-corpuswide.txt',30,100,100)
 
