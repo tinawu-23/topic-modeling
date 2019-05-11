@@ -1,9 +1,8 @@
-def cleantext(text,MIN_NUMWORDS,IF_STOPWORD):
+def cleantext(text,IF_STOPWORD):
     if text == '': return ''
     from nltk.tokenize import sent_tokenize,word_tokenize
     from gensim.parsing.preprocessing import STOPWORDS    
     ret = ''
-    numwords = 0
     for sentences in sent_tokenize(text):
         for word in word_tokenize(sentences):
             word = word.lower()
@@ -11,27 +10,41 @@ def cleantext(text,MIN_NUMWORDS,IF_STOPWORD):
                 if IF_STOPWORD:
                     if len(word) > 2 and not word in STOPWORDS:
                         ret += ' '+word
-                        numwords += 1
                 else:
                     ret += ' '+word
-                    numwords += 1
-    if numwords < MIN_NUMWORDS: return ''
     return ret[1:]
 
-def preprocessing(fileoutput,fileinput,MIN_NUMWORDS=10,IF_STOPWORD=True):
+def preprocessing(fileoutput,fileinput,IF_STOPWORD=True):
+    from tqdm import tqdm
     fw = open(fileoutput,'w')
-    fr = open(fileinput,'r')
+    fr = open(fileinput, 'r', encoding="utf8", errors='ignore')
     fr.readline()
-    for line in fr:
+    for line in tqdm(fr):
         arr = line.strip('\r\n').split('\t')
-        text = cleantext(arr[4]+' '+arr[5],MIN_NUMWORDS,IF_STOPWORD)
+        title = arr[4]
+        abstract = arr[5]
+        if abstract == "none":
+            abstract = ""
+        text = title+' '+abstract
+        if len(text.split()) < 10: continue
+        text = cleantext(text,IF_STOPWORD)
         if text == '': continue
         fw.write(text+'\n')
     fr.close()
     fw.close()
 
-def runlda(filetopicwords,filewordtopics,filedoctopics,fileinput, \
-        NUMTOPICS=30,NUMPASSES=10,NUMITERATIONS=10):
+def preprocesstop(fileoutput,fileinput):
+    from tqdm import tqdm
+    from gensim.parsing.preprocessing import remove_stopwords
+    fw = open(fileoutput,'w')
+    fr = open(fileinput, 'r', encoding="utf8", errors='ignore')
+    for line in tqdm(fr):
+        text = remove_stopwords(line.strip())
+        fw.write(text+'\n')
+    fr.close()
+    fw.close()
+
+def runlda(filetopicwords,fileinput,NUMTOPICS=30,NUMPASSES=10,NUMITERATIONS=10):
     print('runlda...')
     from gensim.corpora import Dictionary
     from gensim.models.ldamodel import LdaModel
@@ -130,14 +143,13 @@ def preprocessing_corpuswide(fileoutput,fileinput,filecorpuswide):
 
 if __name__ == '__main__':
 
-    ''' run LDA while NOT removing regular stopwords '''
-    preprocessing('LDA/nsf-awards.txt', 'nsf-awards.txt', 10, False)
-
-    # runlda('LDA/topicwords.csv','LDA/wordtopics.csv', \
-    #         'LDA/doctopics.csv','LDA/documents.txt',30,100,100)
-
     ''' run LDA while removing regular stopwords '''
-    preprocessing('LDA/documents.txt','nsf-awards.txt',10,True)
+    # preprocesstop('LDA-all/nsf-awards-stop.txt','LDA-all/nsf-awards.txt')
+
+    # runlda('LDA-all/lda-award-5.csv', 'LDA-all/nsf-awards-stop.txt', 30, 20, 20)
+
+    ''' run LDA while NOT removing regular stopwords '''
+    # preprocessing('LDA-all/nsf-awards.txt','nsf-awards-org.txt',False)
     # runlda('LDA/topicwords-stop.csv','LDA/wordtopics-stop.csv', \
     #         'LDA/doctopics-stop.csv','LDA/documents-stop.txt',30,100,100)
 
@@ -150,8 +162,8 @@ if __name__ == '__main__':
 
 
     ''' run LDA on original data but with corpus wide stopwords removed '''
-    preprocessing_corpuswide('LDA/documents-all.txt','LDA/documents.txt', \
-            'LDA/corpuswide-stop.txt')
+    preprocessing_corpuswide('LDA-all/nsf-awards-allcpstop.txt',
+                             'LDA-all/nsf-awards-stop.txt', 'corpuswide-stop.txt')
     # runlda('LDA/topicwords-corpuswide.csv','LDA/wordtopics-corpuswide.csv', \
     #         'LDA/doctopics-corpuswide.csv','LDA/documents-corpuswide.txt',30,100,100)
 
